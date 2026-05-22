@@ -4,6 +4,7 @@
 
 利用napcat获取官bot的uid，然后获取本群的 开放官bot的全量和主动的配置链接，然后手机qq打开就可以配置了
 
+## code
 ```typescript
 import { Context, Schema } from 'koishi'
 
@@ -47,3 +48,8 @@ export function apply(ctx: Context, config: Config) {
 }
 
 ```
+
+## result
+![1.png](doc/preview-image/1.png)
+![2.png](doc/preview-image/2.png)
+![3.png](doc/preview-image/3.png)
