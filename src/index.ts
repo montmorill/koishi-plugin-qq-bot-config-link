@@ -1,40 +1,53 @@
-import { Context, Schema } from 'koishi'
+import { Context, h } from 'koishi'
+import { Config } from './config'
+import { buildMarkdownMessage, sendQQMessage } from './qq'
 
 export const name = 'get-qq-bot-transfer-link'
-
-export interface Config { }
-
-export const Config: Schema<Config> = Schema.object({})
+export { Config }
 
 export function apply(ctx: Context, config: Config) {
-  // write your plugin here
-  // 请使用napcat调用这个接口, adapter-onebot
-  ctx.command('napcat-getuser [userId:string]')
+
+  ctx.command('napcat-getuser [userId:string]', '请在napcat使用这个指令(其他的onebot实现不知道能不能用捏)')
     .action(async ({ session }, userId) => {
-      // const user = await session.bot.getUser(targetUserId, session.channelId);
-      const user = await session?.bot.internal._request('get_stranger_info', { user_id: userId });
-      await session?.send(`用户信息：${JSON.stringify(user)}`)
+      if (session?.platform !== 'onebot') return `${h.quote(session?.messageId)}❌ 仅支持 onebot 平台使用此指令`;
+      const user = await session?.bot.internal._request('get_stranger_info', { user_id: userId })
+      await session?.send(`${h.quote(session?.messageId)}用户信息：${JSON.stringify(user)}`)
     })
 
-  ctx.command('qqbot-url <userId:string>')
-    //userId是qq官bot的qq号
-    .action(async ({ session }, userId) => {
-      const groupCode = session?.guildId;
-      const botInfo = await session?.bot.internal._request('get_stranger_info', { user_id: userId });
-      const botUid = botInfo?.data?.uid || '';
+  ctx.command('qqbot-url', '传参是官bot的QQ号')
+    .option('botuin', '-u <botuin:string> 官Bot的QQ号')
+    .option('botuid', '-i <botuid:string> 官Bot的UID')
+    .option('groupcode', '-g <groupcode:string> 群号')
+    .action(async ({ session, options }) => {
+      // ── 优先级: option > config > 报错 ──
+      const botUin = options.botuin || config.defaultBotUin
+      const botUid = options.botuid || config.defaultBotUid
+      let groupCode = options.groupcode || config.defaultGroupCode || session?.guildId
+
+      if (!botUin) return '❌ 缺少 botUin（官BotQQ号），请通过 --botuin 传入或配置 defaultBotUin'
+      if (!botUid) return '❌ 缺少 botUid（官Bot UID），请通过 --botuid 传入或配置 defaultBotUid'
+      if (!groupCode) return '❌ 缺少 groupCode（群号），请通过 --groupcode 传入或配置 defaultGroupCode'
 
       const jsonObj = {
-        page_name: "ai_group_service_agreement_pop_page",
+        page_name: 'ai_group_service_agreement_pop_page',
         groupCode: Number(groupCode),
-        botUin: Number(userId),
-        botUid: botUid,
+        botUin: Number(botUin),
+        botUid,
         screen: 1,
-      };
+      }
 
-      const encoded = encodeURIComponent(JSON.stringify(jsonObj));
-      const url = `https://club.vip.qq.com/transfer?open_kuikly_info=${encoded}`;
+      const url = `https://club.vip.qq.com/transfer?open_kuikly_info=${encodeURIComponent(JSON.stringify(jsonObj))}`
 
-      await session?.send(`官Bot全量主动配置链接（安卓和iOSQQ 9.2.90及以上版本可用。iOS也可以直接去设置里配置）：\n${url}`);
+      const isQQ = session?.platform === 'qq'
+      if (isQQ && session?.qq && (config.useMarkdown || config.addJumpButton)) {
+        await sendQQMessage(session, buildMarkdownMessage(url, config.addJumpButton, config.showBotInfo, config.showImage, config.imageUrl, config.imageWidth, config.imageHeight, botUin, botUid, groupCode))
+      } else {
+        const imageBlock = config.showImage ? `${h.image(config.imageUrl)}\n` : ''
+        const infoBlock = config.showBotInfo
+          ? `🆔 botUin：${botUin}\n🔑 botUid：${botUid}\n👥 groupCode：${groupCode}\n\n`
+          : ''
+        await session?.send(`${infoBlock}官Bot全量主动配置链接（安卓和iOS QQ 9.2.90及以上版本可用。iOS也可以直接去设置里配置）：\n${imageBlock}${url}`)
+      }
     })
 
 }

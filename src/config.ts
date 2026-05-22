@@ -1,0 +1,110 @@
+import { Schema } from 'koishi'
+
+/**
+ * 📋 插件配置项接口
+ */
+export interface Config {
+  /** 📝 是否在 QQ 官方平台使用 Markdown 格式发送消息 */
+  useMarkdown: boolean
+  /** 🔗 是否在消息末尾添加一个跳转链接按钮 */
+  addJumpButton: boolean
+  /** 🆔 官Bot 的默认 botUin（QQ号），作为参数兜底值 */
+  defaultBotUin: string
+  /** 🔑 官Bot 的默认 botUid，作为参数兜底值 */
+  defaultBotUid: string
+  /** 👥 默认群号 groupCode，作为参数兜底值 */
+  defaultGroupCode: string
+  /** 📋 是否在消息中显示 uin / uid / groupCode */
+  showBotInfo: boolean
+  /** 🖼️ 是否在消息中附带操作提示图片 */
+  showImage: boolean
+  /** 🖼️ 操作提示图片的 URL */
+  imageUrl: string
+  /** 📐 Markdown 图片宽度（含 px 单位） */
+  imageWidth: string
+  /** 📐 Markdown 图片高度（含 px 单位） */
+  imageHeight: string
+}
+
+export const Config: Schema<Config> = Schema.object({
+  /**
+   * 📝 useMarkdown — Markdown 开关
+   * - true  → 发送 Markdown 富文本消息（支持链接高亮、排版更美观）✨
+   * - false → 发送纯文本消息（最简兼容模式）📄
+   * 💡 非 QQ 官方平台时自动降级为纯文本，不受此配置影响。
+   */
+  useMarkdown: Schema.boolean().default(true)
+    .description('📝 在QQ官方平台使用Markdown按钮格式发送配置链接（而非贼长的纯文本链接）✨'),
+
+  /**
+   * 🔗 addJumpButton — 跳转按钮开关
+   * - true  → 消息底部挂载一个「🌐 打开配置链接」按钮，点击一键跳转 🚀
+   * - false → 不添加按钮，仅展示文字链接 📄
+   * 💡 开启后自动启用 Markdown 模式（按钮依赖 msg_type: 2）。
+   */
+  addJumpButton: Schema.boolean().default(true)
+    .description('🔗 在QQ官方Bot平台的消息末尾添加一个跳转链接按钮，点击直接打开配置页 🚀'),
+
+  /**
+   * 🆔 defaultBotUin — 默认官Bot QQ号
+   * 当指令未传 --botuin 时使用此值。
+   * 留空且未传参时会报错 ⚠️
+   */
+  defaultBotUin: Schema.string().default('')
+    .description('🆔 默认官Bot的QQ号（botUin），未传 --botuin 时兜底使用'),
+
+  /**
+   * 🔑 defaultBotUid — 默认官Bot UID
+   * 当指令未传 --botuid 时使用此值。
+   * 留空且未传参时会报错 ⚠️
+   */
+  defaultBotUid: Schema.string().default('')
+    .description('🔑 默认官Bot的UID（botUid），未传 --botuid 时兜底使用'),
+
+  /**
+   * 👥 defaultGroupCode — 默认群号
+   * 当指令未传 --groupcode 时使用此值。
+   * 留空则使用当前会话群号兜底。
+   */
+  defaultGroupCode: Schema.string().default('')
+    .description('👥 默认群号（groupCode），未传 --groupcode 时兜底使用'),
+
+  /**
+   * 📋 showBotInfo — 显示 Uin/Uid/GroupCode 信息
+   * - true  → 在返回消息中附加上 uin / uid / groupCode 信息 📊
+   * - false → 不显示，仅输出链接 🔗
+   */
+  showBotInfo: Schema.boolean().default(false)
+    .description('📋 在返回消息中显示当前使用的 botUin / botUid / groupCode 信息'),
+
+  /**
+   * 🖼️ showImage — 操作提示图片开关
+   * - true  → 在链接/按钮上方附带操作提示图片 🖼️
+   * - false → 不显示图片
+   */
+  showImage: Schema.boolean().default(true)
+    .description('🖼️ 在消息中附带操作提示图片（放在链接/按钮上方）'),
+
+  /**
+   * 🖼️ imageUrl — 操作提示图片 URL
+   * 当 showImage 为 true 时使用此 URL 显示图片。
+   */
+  imageUrl: Schema.string()
+    .default('https://gitee.com/vincent-zyu/koishi-plugin-get-qq-bot-transfer-link/releases/download/%E6%93%8D%E4%BD%9C%E6%8F%90%E7%A4%BA.png/%E6%93%8D%E4%BD%9C%E6%8F%90%E7%A4%BA.png')
+    .role('link')
+    .description('🖼️ 操作提示图片的 URL（Markdown 中显示在链接/按钮上方）'),
+
+  /**
+   * 📐 imageWidth — Markdown 图片宽度
+   * QQ Markdown 图片尺寸格式：![#Wpx #Hpx](url)
+   */
+  imageWidth: Schema.string().default('1080px')
+    .description('📐 Markdown 图片宽度（含 px 单位，如 1080px）'),
+
+  /**
+   * 📐 imageHeight — Markdown 图片高度
+   * QQ Markdown 图片尺寸格式：![#Wpx #Hpx](url)
+   */
+  imageHeight: Schema.string().default('888px')
+    .description('📐 Markdown 图片高度（含 px 单位，如 888px）'),
+})
