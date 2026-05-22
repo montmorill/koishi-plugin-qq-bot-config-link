@@ -88,18 +88,10 @@ export const Config: Schema<Config> = Schema.object({
 })
 
 export function apply(ctx: Context, config: Config) {
-  ctx.command('napcat-getuser [userId:string]', '请在napcat使用这个指令(其他的onebot实现不知道能不能用捏)')
-    .action(async ({ session }, userId) => {
-      if (session?.platform !== 'onebot')
-        return `${h.quote(session?.messageId)}❌ 仅支持 onebot 平台使用此指令`
-      const user = await session?.bot.internal._request('get_stranger_info', { user_id: userId })
-      await session?.send(`${h.quote(session?.messageId)}用户信息：${JSON.stringify(user)}`)
-    })
-
-  ctx.command('qqbot-url <groupId:string>', '传参是官bot的QQ号')
-    .option('uin', '-u <uin:string> 官Bot的QQ号')
-    .option('uid', '-i <uid:string> 官Bot的UID')
-    .option('group', '-g <group:string> 群号')
+  ctx.command('qqbot-url <groupId:string>', '获取QQ机器人的群聊能力配置链接。')
+    .option('uin', '-u <uin:string> Bot UIN')
+    .option('uid', '-i <uid:string> Bot UID')
+    .option('group', '-g <group:string> QQ 群号')
     .action(async ({ session, options = {} }, groupId) => {
       // 优先级: option > config > 报错
       const botUin = options.uin || config.defaultBotUin
