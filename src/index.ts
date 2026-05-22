@@ -12,12 +12,10 @@ export interface Config {
   /** 🔗 是否在消息末尾添加一个跳转链接按钮 */
   addJumpButton: boolean
   /** 🆔 官Bot 的默认 botUin（QQ号），作为参数兜底值 */
-  defaultBotUin: string
+  botUin: number
   /** 🔑 官Bot 的默认 botUid，作为参数兜底值 */
-  defaultBotUid: string
-  /** 👥 默认群号 groupCode，作为参数兜底值 */
-  defaultGroupCode: string
-  /** 📋 是否在消息中显示 uin / uid / groupCode */
+  botUid: string
+  /** 📋 是否在消息中显示 botUin / botUid / groupCode */
   showBotInfo: boolean
   /** 🖼️ 是否在消息中附带操作提示图片 */
   showImage: boolean
@@ -43,25 +41,18 @@ export const Config: Schema<Config> = Schema.object({
   addJumpButton: Schema.boolean().default(true).description('🔗 在QQ官方Bot平台的消息末尾添加一个跳转链接按钮，点击直接打开配置页 🚀'),
 
   /**
-   * 🆔 defaultBotUin — 默认 Bot UIN
+   * 🆔 uin — 默认 Bot UIN
    * 当指令未传 --botuin 时使用此值。
    * 留空且未传参时会报错 ⚠️
    */
-  defaultBotUin: Schema.string().description('🆔 默认 Bot UIN'),
+  botUin: Schema.number().description('🆔 默认机器人 UIN'),
 
   /**
-   * 🔑 defaultBotUid — 默认 Bot UID
+   * 🔑 uid — 默认 Bot UID
    * 当指令未传 --botuid 时使用此值。
    * 留空且未传参时会报错 ⚠️
    */
-  defaultBotUid: Schema.string().description('🔑 默认 Bot UID'),
-
-  /**
-   * 👥 defaultGroupCode — 默认群号
-   * 当指令未传 --groupcode 时使用此值。
-   * 留空则使用当前会话群号兜底。
-   */
-  defaultGroupCode: Schema.string().description('👥 默认 QQ 群号'),
+  botUid: Schema.string().description('🔑 默认机器人 UID'),
 
   /**
    * 📋 showBotInfo — 显示 Uin/Uid/GroupCode 信息
@@ -88,22 +79,21 @@ export const Config: Schema<Config> = Schema.object({
 })
 
 export function apply(ctx: Context, config: Config) {
-  ctx.command('qqbot-url <groupId:string>', '获取QQ机器人的群聊能力配置链接。')
-    .option('uin', '-u <uin:string> Bot UIN')
-    .option('uid', '-i <uid:string> Bot UID')
-    .option('group', '-g <group:string> QQ 群号')
-    .action(async ({ session, options = {} }, groupId) => {
+  ctx.command('qq-bot-config-url <groupCode:string>', '获取QQ机器人的群聊能力配置链接。')
+    .option('uin', '-u <uin:number> 机器人 UIN')
+    .option('uid', '-i <uid:string> 机器人 UID')
+    .action(async ({ session, options = {} }, groupCode) => {
       // 优先级: option > config > 报错
-      const botUin = options.uin || config.defaultBotUin
-      const botUid = options.uid || config.defaultBotUid || session?.bot.selfId
-      const groupCode = options.group || config.defaultGroupCode || groupId || session?.guildId
+      const botUin = options.uin || config.botUin
+      const botUid = options.uid || config.botUid || session?.bot.selfId
+      groupCode ||= session?.guildId || ''
 
       if (!botUin)
-        return '❌ 缺少 botUin（机器人 UIN），请通过 --uin 传入或配置 defaultBotUin'
+        return '❌ 缺少 botUin（机器人 UIN），请通过 --uin 传入或配置 botUin'
       if (!botUid)
-        return '❌ 缺少 botUid（机器人 UID），请通过 --uid 传入或配置 defaultBotUid'
+        return '❌ 缺少 botUid（机器人 UID），请通过 --uid 传入或配置 botUid'
       if (!groupCode || !/^\d+$/.test(groupCode))
-        return '❌ 缺少 groupCode（QQ 群号），请通过 --group 传入或配置 defaultGroupCode'
+        return '❌ 缺少 groupCode（QQ 群号）'
 
       const url = `https://club.vip.qq.com/transfer?open_kuikly_info=${encodeURIComponent(JSON.stringify({
         page_name: 'ai_group_service_agreement_pop_page',
@@ -137,16 +127,8 @@ export function apply(ctx: Context, config: Config) {
             `点击下方按钮打开配置页面。`,
             `> ${availability}`,
             image,
-          ].filter(Boolean).join('\n\n')),
-          ...config.addJumpButton ? [h('button', {
-            render_data: { label: '🌐 打开配置链接', style: 1 },
-            action: {
-              type: 0,
-              permission: { type: 2 },
-              data: url,
-              unsupport_tips: '请更新 QQ 版本后使用。',
-            },
-          })] : [],
+          ].filter(Boolean).flatMap(item => [item, h('br')])),
+          ...config.addJumpButton ? [h('button', { type: 'link', href: url }, '🌐 打开配置链接')] : [],
         ]
       }
       return [
