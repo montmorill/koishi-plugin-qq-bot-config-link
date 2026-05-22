@@ -113,7 +113,7 @@ export function apply(ctx: Context, config: Config) {
         screen: 1,
       }))}`
 
-      const availability = '安卓和iOS QQ 9.2.90及以上版本可用。iOS也可以直接去设置里配置。'
+      const availability = '安卓或iOS QQ 9.2.90及以上版本可用。'
       const image = config.showImage ? h.image(config.imageUrl) : ''
       const botInfo = !config.showBotInfo ? '' : session?.platform === 'qq'
         ? [
@@ -144,7 +144,7 @@ export function apply(ctx: Context, config: Config) {
               type: 0,
               permission: { type: 2 },
               data: url,
-              unsupport_tips: '请更新QQ版本后使用',
+              unsupport_tips: '请更新 QQ 版本后使用。',
             },
           })] : [],
         ]
