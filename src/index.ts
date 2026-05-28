@@ -30,7 +30,7 @@ export const Config: Schema<Config> = Schema.object({
    * - false → 发送纯文本消息（最简兼容模式）📄
    * 💡 非 QQ 官方平台时自动降级为纯文本，不受此配置影响。
    */
-  useMarkdown: Schema.boolean().default(true).description('📝 在QQ官方平台使用Markdown按钮格式发送配置链接（而非贼长的纯文本链接）✨'),
+  useMarkdown: Schema.boolean().default(true).description('📝 在QQ官方平台使用Markdown按钮格式发送配置链接（而非贼长的纯文本链接）✨。'),
 
   /**
    * 🔗 addJumpButton — 跳转按钮开关
@@ -38,35 +38,35 @@ export const Config: Schema<Config> = Schema.object({
    * - false → 不添加按钮，仅展示文字链接 📄
    * 💡 开启后自动启用 Markdown 模式（按钮依赖 msg_type: 2）。
    */
-  addJumpButton: Schema.boolean().default(true).description('🔗 在QQ官方Bot平台的消息末尾添加一个跳转链接按钮，点击直接打开配置页 🚀'),
+  addJumpButton: Schema.boolean().default(true).description('🔗 在QQ官方Bot平台的消息末尾添加一个跳转链接按钮，点击直接打开配置页 🚀。'),
 
   /**
    * 🆔 uin — 默认 Bot UIN
    * 当指令未传 --botuin 时使用此值。
    * 留空且未传参时会报错 ⚠️
    */
-  botUin: Schema.number().description('🆔 默认机器人 UIN'),
+  botUin: Schema.number().description('🆔 默认机器人 UIN。'),
 
   /**
    * 🔑 uid — 默认 Bot UID
    * 当指令未传 --botuid 时使用此值。
    * 留空且未传参时会报错 ⚠️
    */
-  botUid: Schema.string().description('🔑 默认机器人 UID'),
+  botUid: Schema.string().description('🔑 默认机器人 UID。'),
 
   /**
    * 📋 showBotInfo — 显示 Uin/Uid/GroupCode 信息
    * - true  → 在返回消息中附加上 uin / uid / groupCode 信息 📊
    * - false → 不显示，仅输出链接 🔗
    */
-  showBotInfo: Schema.boolean().default(false).description('📋 在返回消息中显示当前使用的 botUin / botUid / groupCode 信息'),
+  showBotInfo: Schema.boolean().default(false).description('📋 在返回消息中显示当前使用的 botUin / botUid / groupCode 信息。'),
 
   /**
    * 🖼️ showImage — 操作提示图片开关
    * - true  → 在链接/按钮上方附带操作提示图片 🖼️
    * - false → 不显示图片
    */
-  showImage: Schema.boolean().default(true).description('🖼️ 在消息中附带操作提示图片'),
+  showImage: Schema.boolean().default(true).description('🖼️ 在消息中附带操作提示图片。'),
 
   /**
    * 🖼️ imageUrl — 操作提示图片 URL
@@ -75,7 +75,7 @@ export const Config: Schema<Config> = Schema.object({
   imageUrl: Schema.string()
     .default('https://gitee.com/vincent-zyu/koishi-plugin-get-qq-bot-transfer-link/releases/download/%E6%93%8D%E4%BD%9C%E6%8F%90%E7%A4%BA.png/%E6%93%8D%E4%BD%9C%E6%8F%90%E7%A4%BA.png')
     .role('link')
-    .description('🖼️ 操作提示图片的 URL'),
+    .description('🖼️ 操作提示图片的 URL。'),
 })
 
 export function apply(ctx: Context, config: Config) {
