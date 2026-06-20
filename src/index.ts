@@ -79,7 +79,8 @@ export const Config: Schema<Config> = Schema.object({
 })
 
 export function apply(ctx: Context, config: Config) {
-  ctx.command('qq-bot-config-url <groupCode:string>', '获取QQ机器人的群聊能力配置链接')
+  ctx.$filter.platform('qq')
+    .command('config-link <groupCode:string>', '获取 QQ 机器人的群聊能力配置链接')
     .option('uin', '-u <uin:number> 机器人 UIN')
     .option('uid', '-i <uid:string> 机器人 UID')
     .action(async ({ session, options = {} }, groupCode) => {
